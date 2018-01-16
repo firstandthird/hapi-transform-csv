@@ -12,8 +12,8 @@ const register = (server, pluginOptions) => {
     if (response.isBoom) {
       return h.continue;
     }
-    if (request.headers.accept === 'text/csv') {
-      const routeOptions = request.route.settings.plugins['hapi-transform-csv'];
+    const routeOptions = request.route.settings.plugins['hapi-transform-csv'];
+    if (routeOptions && request.headers.accept === 'text/csv') {
       // may throw error if not formatted correctly:
       return h.response(json2csv(Object.assign({}, pluginOptions, routeOptions, response.source)));
     }
