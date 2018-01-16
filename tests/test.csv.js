@@ -106,6 +106,7 @@ tap.test('will pass config options to json2csv', async(t) => {
     config: {
       plugins: {
         'hapi-transform-csv': {
+          quotes: '$'
         }
       }
     },
@@ -130,14 +131,15 @@ tap.test('will pass config options to json2csv', async(t) => {
       };
     }
   });
-  await server.register(plugin, {});
+  await server.register({ plugin, options: { del: '_' } });
   await server.start();
   const csvResponse = await server.inject({
     method: 'get',
     url: '/path1.csv'
   });
   t.equal(csvResponse.statusCode, 200, 'returns HTTP OK');
-  t.equal(typeof csvResponse.result, 'string', 'returns a string value');
+  t.equal(csvResponse.result.indexOf('$car$'), 0, 'applied the json2csv route options');
+  t.equal(csvResponse.result.indexOf('$car$_$price$_$color$'), 0, 'applied the json2csv plugin options');
   await server.stop();
   t.end();
 });
