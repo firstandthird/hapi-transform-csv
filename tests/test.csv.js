@@ -31,7 +31,7 @@ tap.test('can configure a route to return csv instead of json', async(t) => {
 
   server.route({
     method: 'get',
-    path: '/path1.csv',
+    path: '/path1',
     config: {
       plugins: {
         'hapi-transform-csv': {
@@ -102,7 +102,7 @@ tap.test('will pass config options to json2csv', async(t) => {
   const server = await new Hapi.Server({ port: 8080 });
   server.route({
     method: 'get',
-    path: '/path1.csv',
+    path: '/path1',
     config: {
       plugins: {
         'hapi-transform-csv': {

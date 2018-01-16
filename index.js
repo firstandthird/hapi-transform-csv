@@ -3,6 +3,7 @@ const register = (server, pluginOptions) => {
   server.ext('onRequest', (request, h) => {
     if (request.path.endsWith('.csv')) {
       request.headers.accept = 'text/csv';
+      request.setUrl(request.path.replace('.csv', ''));
     }
     return h.continue;
   });
