@@ -17,6 +17,7 @@
   "author": "First+Third",
   "license": "MIT",
   "dependencies": {
+    "json2csv": "^3.11.5"
   },
   "devDependencies": {
     "eslint": "^4.15.0",
