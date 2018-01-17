@@ -14,8 +14,6 @@ const register = (server, pluginOptions) => {
     }
     if (request.headers.accept === 'text/csv') {
       const input = Object.assign({}, pluginOptions, request.route.settings.plugins['hapi-transform-csv'] || {});
-      // get the fields:
-      input.fields = Array.from(new Set(response.source.reduce((memo, item) => memo.concat(Object.keys(item)), [])));
       input.data = response.source;
       // json2csv may throw an error if not formatted correctly:
       return h.response(json2csv(input));
