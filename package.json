@@ -1,6 +1,6 @@
 {
   "name": "hapi-transform-csv",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "hapi plugin for routes that need to return json as csv ",
   "main": "index.js",
   "scripts": {
