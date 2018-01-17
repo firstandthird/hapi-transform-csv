@@ -13,8 +13,8 @@ const register = (server, pluginOptions) => {
       return h.continue;
     }
     if (request.headers.accept === 'text/csv') {
-      // may throw error if not formatted correctly:
       const routeOptions = request.route.settings.plugins['hapi-transform-csv'] || {};
+      // json2csv may throw an error if not formatted correctly:
       return h.response(json2csv(Object.assign({}, pluginOptions, routeOptions, response.source)));
     }
     return h.continue;
