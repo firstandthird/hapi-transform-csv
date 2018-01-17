@@ -1,6 +1,8 @@
 const Hapi = require('hapi');
 const tap = require('tap');
 const plugin = require('../index');
+const fs = require('fs');
+const path = require('path');
 
 tap.test('can configure a route to return csv instead of json', async(t) => {
   const server = await new Hapi.Server({ port: 8080 });
@@ -8,24 +10,21 @@ tap.test('can configure a route to return csv instead of json', async(t) => {
     method: 'get',
     path: '/normal',
     handler(request, h) {
-      return {
-        fields: ['car', 'price', 'color'],
-        data: [
-          {
-            car: 'Audi',
-            price: 40000,
-            color: 'blue'
-          }, {
-            car: 'BMW',
-            price: 35000,
-            color: 'black'
-          }, {
-            car: 'Porsche',
-            price: 60000,
-            color: 'green'
-          }
-        ]
-      };
+      return [
+        {
+          car: 'Audi',
+          price: 40000,
+          color: 'blue'
+        }, {
+          car: 'BMW',
+          price: 35000,
+          color: 'black'
+        }, {
+          car: 'Porsche',
+          price: 60000,
+          color: 'green'
+        }
+      ];
     }
   });
 
@@ -39,24 +38,21 @@ tap.test('can configure a route to return csv instead of json', async(t) => {
       }
     },
     handler(request, h) {
-      return {
-        fields: ['car', 'price', 'color'],
-        data: [
-          {
-            car: 'Audi',
-            price: 40000,
-            color: 'blue'
-          }, {
-            car: 'BMW',
-            price: 35000,
-            color: 'black'
-          }, {
-            car: 'Porsche',
-            price: 60000,
-            color: 'green'
-          }
-        ]
-      };
+      return [
+        {
+          car: 'Audi',
+          price: 40000,
+          color: 'blue'
+        }, {
+          car: 'BMW',
+          price: 35000,
+          color: 'black'
+        }, {
+          car: 'Porsche',
+          price: 60000,
+          color: 'green'
+        }
+      ];
     }
   });
   await server.register(plugin, {});
@@ -67,33 +63,27 @@ tap.test('can configure a route to return csv instead of json', async(t) => {
   });
   t.equal(csvResponse.statusCode, 200, 'returns HTTP OK');
   t.equal(typeof csvResponse.result, 'string', 'returns a string value');
-  const rows = csvResponse.result.split('\n');
-  t.notEqual(rows[0].indexOf('car'), -1, 'top row of csv is the headers');
-  t.notEqual(rows[0].indexOf('price'), -1, 'top row of csv is the headers');
-  t.notEqual(rows[0].indexOf('color'), -1, 'top row of csv is the headers');
+  t.equal(csvResponse.result, fs.readFileSync(path.join(__dirname, 'output1.txt'), 'utf-8'), 'returns correct output');
   const jsonResponse = await server.inject({
     method: 'get',
     url: '/normal'
   });
   t.equal(jsonResponse.statusCode, 200, 'returns HTTP OK');
-  t.deepEqual(jsonResponse.result, {
-    fields: ['car', 'price', 'color'],
-    data: [
-      {
-        car: 'Audi',
-        price: 40000,
-        color: 'blue'
-      }, {
-        car: 'BMW',
-        price: 35000,
-        color: 'black'
-      }, {
-        car: 'Porsche',
-        price: 60000,
-        color: 'green'
-      }
-    ]
-  }, 'json returns the original json values');
+  t.deepEqual(jsonResponse.result, [
+    {
+      car: 'Audi',
+      price: 40000,
+      color: 'blue'
+    }, {
+      car: 'BMW',
+      price: 35000,
+      color: 'black'
+    }, {
+      car: 'Porsche',
+      price: 60000,
+      color: 'green'
+    }
+  ], 'json returns the original json values');
   await server.stop();
   t.end();
 });
@@ -111,24 +101,21 @@ tap.test('will pass config options to json2csv', async(t) => {
       }
     },
     handler(request, h) {
-      return {
-        fields: ['car', 'price', 'color'],
-        data: [
-          {
-            car: 'Audi',
-            price: 40000,
-            color: 'blue'
-          }, {
-            car: 'BMW',
-            price: 35000,
-            color: 'black'
-          }, {
-            car: 'Porsche',
-            price: 60000,
-            color: 'green'
-          }
-        ]
-      };
+      return [
+        {
+          car: 'Audi',
+          price: 40000,
+          color: 'blue'
+        }, {
+          car: 'BMW',
+          price: 35000,
+          color: 'black'
+        }, {
+          car: 'Porsche',
+          price: 60000,
+          color: 'green'
+        }
+      ];
     }
   });
   await server.register({ plugin, options: { del: '_' } });
@@ -138,8 +125,7 @@ tap.test('will pass config options to json2csv', async(t) => {
     url: '/path1.csv'
   });
   t.equal(csvResponse.statusCode, 200, 'returns HTTP OK');
-  t.equal(csvResponse.result.indexOf('$car$'), 0, 'applied the json2csv route options');
-  t.equal(csvResponse.result.indexOf('$car$_$price$_$color$'), 0, 'applied the json2csv plugin options');
+  t.equal(csvResponse.result, fs.readFileSync(path.join(__dirname, 'output2.txt'), 'utf-8'), 'returns correct output');
   await server.stop();
   t.end();
 });
