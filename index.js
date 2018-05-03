@@ -12,6 +12,9 @@ const register = (server, pluginOptions) => {
     if (response.isBoom) {
       return h.continue;
     }
+    if (response.statusCode !== 200) {
+      return h.continue;
+    }
     if (request.headers.accept === 'text/csv') {
       const input = Object.assign({}, pluginOptions, request.route.settings.plugins['hapi-transform-csv'] || {});
       input.data = response.source;
