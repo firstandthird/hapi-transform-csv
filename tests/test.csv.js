@@ -129,3 +129,28 @@ tap.test('will pass config options to json2csv', async(t) => {
   await server.stop();
   t.end();
 });
+
+tap.test('will not interfere with non-200 results', async(t) => {
+  const server = await new Hapi.Server({ port: 8080 });
+  server.route({
+    method: 'get',
+    path: '/path1',
+    config: {
+      plugins: {
+        'hapi-transform-table': {}
+      }
+    },
+    handler(request, h) {
+      return h.response('hello there').code(204);
+    }
+  });
+  await server.register({ plugin, options: { excludeSubArrays: true } });
+  await server.start();
+  const tableResponse = await server.inject({
+    method: 'get',
+    url: '/path1.csv'
+  });
+  t.equal(tableResponse.statusCode, 204, 'returns HTTP 204');
+  await server.stop();
+  t.end();
+});
