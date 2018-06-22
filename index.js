@@ -2,8 +2,10 @@ const json2csv = require('json2csv');
 const register = (server, pluginOptions) => {
   server.ext('onRequest', (request, h) => {
     if (request.path.endsWith('.csv')) {
+      const query = request.query;
       request.headers.accept = 'text/csv';
       request.setUrl(request.path.replace('.csv', ''));
+      request.query = query;
     }
     return h.continue;
   });

@@ -154,3 +154,44 @@ tap.test('will not interfere with non-200 results', async(t) => {
   await server.stop();
   t.end();
 });
+
+tap.test('will forward query params to the underlying route', async(t) => {
+  const server = await new Hapi.Server({ port: 8080 });
+  server.route({
+    method: 'get',
+    path: '/path1',
+    config: {
+      plugins: {
+        'hapi-transform-csv': {
+        }
+      }
+    },
+    handler(request, h) {
+      t.equal(request.query.test, '1', 'query param forwarded');
+      return [
+        {
+          car: 'Audi',
+          price: 40000,
+          color: 'blue'
+        }, {
+          car: 'BMW',
+          price: 35000,
+          color: 'black'
+        }, {
+          car: 'Porsche',
+          price: 60000,
+          color: 'green'
+        }
+      ];
+    }
+  });
+  await server.register(plugin, {});
+  await server.start();
+  const csvResponse = await server.inject({
+    method: 'get',
+    url: '/path1.csv?test=1'
+  });
+  t.equal(csvResponse.statusCode, 200, 'returns HTTP OK');
+  await server.stop();
+  t.end();
+});
