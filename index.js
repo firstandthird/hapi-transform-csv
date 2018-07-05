@@ -1,20 +1,33 @@
+const qs = require('querystring');
+
 const json2csv = require('json2csv');
 const register = (server, pluginOptions) => {
   server.ext('onRequest', (request, h) => {
     if (request.path.endsWith('.csv')) {
       const query = request.query;
       request.headers.accept = 'text/csv';
-      request.setUrl(request.path.replace('.csv', ''));
+      let newUrl = request.path.replace('.csv', '');
+      // save the original path info:
+      request.app.transformTable = {
+        originalPath: newUrl
+      };
+      if (Object.keys(query).length) {
+        newUrl = `${newUrl}?${qs.stringify(query)}`;
+      }
+      request.setUrl(newUrl);
       request.query = query;
     }
     return h.continue;
   });
   server.ext('onPreResponse', (request, h) => {
     const response = request.response;
-    if (response.isBoom) {
-      return h.continue;
-    }
-    if (response.statusCode !== 200) {
+    if (response.isBoom || response.statusCode !== 200) {
+      // if this was originally a .csv request and it got redirected,
+      // add back the .csv before returning it
+      if (request.app.transformTable && [301, 302].includes(response.statusCode)) {
+        const originalPath = request.app.transformTable.originalPath;
+        response.headers.location = response.headers.location.replace(originalPath, `${originalPath}.csv`);
+      }
       return h.continue;
     }
     if (request.headers.accept === 'text/csv') {
