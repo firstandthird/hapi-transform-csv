@@ -8,7 +8,7 @@ const register = (server, pluginOptions) => {
       request.headers.accept = 'text/csv';
       let newUrl = request.path.replace('.csv', '');
       // save the original path info:
-      request.app.transformTable = {
+      request.app.transformCsv = {
         originalPath: newUrl
       };
       if (Object.keys(query).length) {
@@ -24,8 +24,8 @@ const register = (server, pluginOptions) => {
     if (response.isBoom || response.statusCode !== 200) {
       // if this was originally a .csv request and it got redirected,
       // add back the .csv before returning it
-      if (request.app.transformTable && [301, 302].includes(response.statusCode)) {
-        const originalPath = request.app.transformTable.originalPath;
+      if (request.app.transformCsv && [301, 302].includes(response.statusCode)) {
+        const originalPath = request.app.transformCsv.originalPath;
         response.headers.location = response.headers.location.replace(originalPath, `${originalPath}.csv`);
       }
       return h.continue;
