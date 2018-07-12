@@ -34,7 +34,7 @@ const register = (server, pluginOptions) => {
       const input = Object.assign({}, pluginOptions, request.route.settings.plugins['hapi-transform-csv'] || {});
       input.data = response.source;
       // json2csv may throw an error if not formatted correctly:
-      return h.response(json2csv(input));
+      return h.response(json2csv(input)).type('text/csv');
     }
     return h.continue;
   });

@@ -64,6 +64,7 @@ tap.test('can configure a route to return csv instead of json', async(t) => {
   t.equal(csvResponse.statusCode, 200, 'returns HTTP OK');
   t.equal(typeof csvResponse.result, 'string', 'returns a string value');
   t.equal(csvResponse.result, fs.readFileSync(path.join(__dirname, 'output1.txt'), 'utf-8'), 'returns correct output');
+  t.equal(csvResponse.headers['content-type'], 'text/csv; charset=utf-8');
   const jsonResponse = await server.inject({
     method: 'get',
     url: '/normal'
