@@ -225,3 +225,54 @@ tap.test('auth schemes that do redirects will preserve the original .csv route',
   await server.stop();
   t.end();
 });
+
+tap.test('map config option will preprocess before calling json2csv', async(t) => {
+  const server = await new Hapi.Server({ port: 8080 });
+  let called = false;
+  server.route({
+    method: 'get',
+    path: '/path1',
+    config: {
+      plugins: {
+        'hapi-transform-csv': {
+        }
+      }
+    },
+    handler(request, h) {
+      return [
+        {
+          car: 'Audi',
+          price: 40000,
+          color: 'blue'
+        }, {
+          car: 'BMW',
+          price: 35000,
+          color: 'black'
+        }, {
+          car: 'Porsche',
+          price: 60000,
+          color: 'green'
+        }
+      ];
+    }
+  });
+  await server.register({ plugin, options: {
+    map: (input) => {
+      called = true;
+      input.data.forEach(i => {
+        i.car = `Hybrid ${i.car}`;
+      });
+      return input;
+    }
+  } });
+  await server.start();
+  const csvResponse = await server.inject({
+    method: 'get',
+    url: '/path1.csv'
+  });
+  t.equal(called, true);
+  t.equal(csvResponse.statusCode, 200, 'returns HTTP OK');
+  t.equal(csvResponse.result, fs.readFileSync(path.join(__dirname, 'output3.txt'), 'utf-8'), 'returns correct output');
+  await server.stop();
+  t.end();
+});
