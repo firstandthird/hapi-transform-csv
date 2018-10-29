@@ -1,0 +1,4 @@
+"car","price","color"
+"Hybrid Audi",40000,"blue"
+"Hybrid BMW",35000,"black"
+"Hybrid Porsche",60000,"green"
