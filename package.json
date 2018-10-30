@@ -17,6 +17,7 @@
   "author": "First+Third",
   "license": "MIT",
   "dependencies": {
+    "aug": "^2.0.1",
     "json2csv": "^3.11.5"
   },
   "devDependencies": {

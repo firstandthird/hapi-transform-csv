@@ -274,3 +274,51 @@ tap.test('map config option will preprocess before calling json2csv', async(t) =
   await server.stop();
   t.end();
 });
+
+tap.test('map works on route too', async(t) => {
+  const server = await new Hapi.Server({ port: 8080 });
+  let count = 0;
+  server.route({
+    method: 'get',
+    path: '/path1',
+    config: {
+      plugins: {
+        'hapi-transform-csv': {
+          map(row) {
+            count++;
+            row.car = `Hybrid ${row.car}`;
+            return row;
+          }
+        }
+      }
+    },
+    handler(request, h) {
+      return [
+        {
+          car: 'Audi',
+          price: 40000,
+          color: 'blue'
+        }, {
+          car: 'BMW',
+          price: 35000,
+          color: 'black'
+        }, {
+          car: 'Porsche',
+          price: 60000,
+          color: 'green'
+        }
+      ];
+    }
+  });
+  await server.register({ plugin });
+  await server.start();
+  const csvResponse = await server.inject({
+    method: 'get',
+    url: '/path1.csv'
+  });
+  t.equal(count, 3);
+  t.equal(csvResponse.statusCode, 200, 'returns HTTP OK');
+  t.equal(csvResponse.result, fs.readFileSync(path.join(__dirname, 'output3.txt'), 'utf-8'), 'returns correct output');
+  await server.stop();
+  t.end();
+});

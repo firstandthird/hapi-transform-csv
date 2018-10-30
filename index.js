@@ -1,3 +1,4 @@
+const aug = require('aug');
 const qs = require('querystring');
 
 const json2csv = require('json2csv');
@@ -31,9 +32,10 @@ const register = (server, pluginOptions) => {
       return h.continue;
     }
     if (request.headers.accept === 'text/csv') {
-      const input = Object.assign({}, pluginOptions, request.route.settings.plugins['hapi-transform-csv'] || {});
-      if (pluginOptions.map) {
-        input.data = response.source.map(pluginOptions.map);
+      const input = aug(pluginOptions, request.route.settings.plugins['hapi-transform-csv'] || {});
+      if (input.map) {
+        input.data = response.source.map(input.map);
+        delete input.map;
       } else {
         input.data = response.source;
       }
